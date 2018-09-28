@@ -1,0 +1,51 @@
+The popular casino card game blackjack is usually played with multiple decks
+and money at risk. Countless people with good memory attempt to card count,
+factoring in the likelihood of certain cards to be dealt given ones that have
+previously been dealt. In this version of blackjack, only one full 52-card deck
+of standard playing cards is used. The twist: betting is done with the cards in
+the deck. At the very start of the game, the player is dealt a beggining balance
+of cards from the playing deck to represent his betting power, replacing
+the standard medium of cash. The player will also know the identity of the cards
+in their balance, and will choose which of those to risk in the next round. From
+there, standard rules of blackjack apply, with a win returning the bet to the
+player along with new cards chosen randomly from the remaining deck. If the
+player loses, those cards get shuffled back into the deck. As the game
+progresses and the player wins more cards, the pool of possible cards to be
+drawn decreases,  Once the player wins all the
+cards from the deck, or until the remaining number of cards is less than 4, then
+the player has beaten the house. Should the player loose all his cards, then the
+player has lost to the house. This gimmick allows the player to make better,
+more favourable decisions based on the knowledge of the cards in their balance.
+In essence, the game encourages players to manage an additional dimension of play, 
+one that's similar to the strategies card counters use. And the goal of this
+project is to give the average blackjack player a taste of what it's like to card 
+count, without needing a genius short term memory.
+
+
+
+# program design
+
+###############################################################################
+# DEALER #   _____  _____                                #                    #
+##########  |Q    ||* * *|                               # Choose an action:  #
+#           |     || * * |                               #                    #
+#           |  +  ||* * *|                               # > STAND            #
+#           |     || * * |                               #   HIT              #
+#           |____Q||*_*_*|                               #   DOUBLE DOWN      #
+#                                                        #                    #
+#            _____  _____                                ######################
+#           |4    ||10   |                               #                    #
+#           |     ||     |                               # Dealer's Total: 10 #
+#           |  ^  ||  &  |                               #                    #
+#           |     ||     |                               # Your Total: 14     #
+##########  |____4||___10|                               #                    #
+#  YOU   #                                               #                    #
+###############################################################################
+#                                Cards you own                                #
+#                                                                             #
+#   A^    2^    3^    4^    5^    6^    7^    8^    9^   10^    J^    Q^    K^#
+#   A&    2^    3^    4^    5^    6^    7^    8^    9^   10^    J^    Q^    K^#
+#   A@    2^    3^    4^    5^    6^    7^    8^    9^   10^    J^    Q^    K^#
+#   A~    2^    3^    4^    5^    6^    7^    8^    9^   10^    J^    Q^    K^#
+#                                                                             #
+###############################################################################
