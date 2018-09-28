@@ -40,7 +40,7 @@
     " _____ ",\
     "|%s    |",\
     "|     |",\
-    "|  %c  |",\
+    "|  %s  |",\
     "|     |",\
     "|____%s|"\
 }
@@ -49,9 +49,18 @@
     " _____ ",\
     "|%s   |",\
     "|     |",\
-    "|  %c  |",\
+    "|  %s  |",\
     "|     |",\
     "|___%s|"\
+}
+
+#define SPR_CARD_NULL {\
+    " _____ ",\
+    "|* * *|",\
+    "| * * |",\
+    "|* * *|",\
+    "| * * |",\
+    "|*_*_*|"\
 }
 
 #define SPR_ACTION_X 58
@@ -61,7 +70,7 @@
 
 #define SPR_ACTION {\
     "",\
-    "Choose an action"\
+    " Choose an action"\
 }
 
 #define SPR_STATS_X 58
@@ -83,9 +92,9 @@
 #define SPR_COLLECTION_H 2
 #define SPR_COLLECTION_ROWS 4
 
-#define SPR_COLLECTION_TXT {\
+#define SPR_COLLECTION {\
     "                                Cards you own",\
-    "",\
+    ""\
 }
 
 
