@@ -7,9 +7,19 @@
 #define DECK_SIZE 52
 #define DECK_SUITS 4
 #define SUIT_SIZE 13
+#define POINTS_FACE 10
+#define POINTS_FACE_INDEX 9
+#define POINTS_ACE_HARD 11
+#define POINTS_ACE_SOFT 1
+#define POINTS_MAX 21
+#define DEALER_HIT_MAX 16
 #define PLAYER_START_CARDS 10
 #define BET_MIN_INITIAL 1
 #define DECK_LEFTOVER_WIN 3
+#define HAND_MAX_SIZE 6
+#define SEL_NONE -1
+#define SEL_STAND 0
+#define SEL_HIT 1
 
 // drawing macros
 #define COLLECTION_PAD "    "
@@ -23,6 +33,9 @@
 #define TABLE_PLAYER_Y 8
 
 #define ACTION_OPTION_PAD_L 3
+#define ACTION_OPTION_NUM 2
+#define ACTION_STAND "STAND"
+#define ACTION_HIT "HIT"
 
 #define COLLECTION_ROWS 4
 #define COLLECTION_PAD_L 1
@@ -32,7 +45,8 @@
 #define COLLECTION_CURSOR_LEN 2
 #define COLLECTION_HL_NONE -1
 
-#define NULL_CARD -1
+#define CARD_NULL -1
+#define CARD_ACE 0
 
 // util macros
 #define CARD_TO_VAL {\

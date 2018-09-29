@@ -97,5 +97,53 @@
     ""\
 }
 
+#define SPR_ACTION_CLR_H 7
+#define SPR_ACTION_CLR {\
+    "                    ",\
+    "                    ",\
+    "                    ",\
+    "                    ",\
+    "                    ",\
+    "                    ",\
+    "                    "\
+}
+
+#define SPR_STATS_CLR_H 6
+#define SPR_STATS_CLR {\
+    "                    ",\
+    "                    ",\
+    "                    ",\
+    "                    ",\
+    "                    ",\
+    "                    "\
+}
+
+#define SPR_COLLECTION_CLR_H 7
+#define SPR_COLLECTION_CLR {\
+    "                                                                              ",\
+    "                                                                              ",\
+    "                                                                              ",\
+    "                                                                              ",\
+    "                                                                              ",\
+    "                                                                              ",\
+    "                                                                              "\
+}
+
+#define SPR_TABLE_CLR_H 13
+#define SPR_TABLE_CLR {\
+    "                                          ",\
+    "                                          ",\
+    "                                          ",\
+    "                                          ",\
+    "                                          ",\
+    "                                          ",\
+    "                                          ",\
+    "                                          ",\
+    "                                          ",\
+    "                                          ",\
+    "                                          ",\
+    "                                          ",\
+    "                                          "\
+}
 
 #endif

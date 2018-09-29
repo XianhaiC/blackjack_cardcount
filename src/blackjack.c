@@ -43,8 +43,7 @@ void init_game(game_info *info) {
                 continue;
             }
             else {
-                info->deck[rand_num] = 0;
-                info->player_cards[rand_num] = 1;
+                game_info_give_player_card(info, rand_num);
                 break;
             }
         }
@@ -70,10 +69,44 @@ void process_gameplay(game_info *info) {
 void play_round(game_info *info) {
     // betting phase
     process_betting(info);
-    // player actions phase
-    // dealer actions phase
+    while (1) {
+        // process a player action
+        process_action(info);
+
+        if (info->last_action == SEL_STAND) {
+            break;
+        }
+        else if (info->last_action == SEL_HIT) {
+            if (info->sum_player > POINTS_MAX) {
+                // player loses round
+            }
+        }
+    }
+
+    // dealer plays if the player has not busted
+    if (info->sum_player <= POINTS_MAX) {
+        process_dealer_play(info);    
+    }
+
     // winner determination
-    // bet distribution phase
+    if (info->sum_player <= POINTS_MAX) {
+        // player has won
+        if (info->sum_dealer < info->sum_player) {
+            process_bet_return(info);
+            process_bet_winnings(info);
+        }
+        // tie
+        else if (info->sum_dealer == info->sum_player) {
+            process_bet_return(info);
+        }
+        // loss
+        else {
+            process_bet_loss(info);
+        }
+    }
+    else {
+        process_bet_loss(info);
+    }
 }
 
 void process_betting(game_info *info) {
@@ -82,12 +115,12 @@ void process_betting(game_info *info) {
     int highlight_x;
     int highlight_y;
     int highlight_index;
-    int highlight_num = 0;
 
     int betting_done = 0;
 
-    // reset bet selections
+    // reset bet info
     memset(info->bet_sel, 0, DECK_SIZE * sizeof(info->bet_sel[0]));
+    info->bet_amt = 0;
 
     while (info->player_cards[i] != 1) {
         i++;
@@ -96,6 +129,9 @@ void process_betting(game_info *info) {
     highlight_index = i;
     highlight_x = i % SUIT_SIZE;
     highlight_y = i / SUIT_SIZE;
+
+    draw_collection(info->player_cards, highlight_index, info->bet_sel);
+    refresh();
 
     while (betting_done == 0) {
         sel = getch();
@@ -125,19 +161,11 @@ void process_betting(game_info *info) {
                     break;
                 }
 
-                // set the selected card
-                if (info->bet_sel[highlight_index] == 0) {
-                    info->bet_sel[highlight_index] = 1;
-                    highlight_num++;
-                }
-                else {
-                    info->bet_sel[highlight_index] = 0;
-                    highlight_num--;
-                }
-
+                // toggle the selection of the highlighted card
+                game_info_bet_sel_toggle(info, highlight_index);
                 break;
             case KIN_CONFIRM:
-                if (highlight_num < info->bet_min) {
+                if (info->bet_amt < info->bet_min) {
                     //notice_min_bet_required();
                     break;
                 }
@@ -148,9 +176,88 @@ void process_betting(game_info *info) {
             default:
                 break;
         }
-        highlight_index = highlight_y * SUIT_SIZE + highlight_x;
+        
+        // calculate the new index for the cursor
+        if (betting_done == 0) {
+            highlight_index = highlight_y * SUIT_SIZE + highlight_x;
+        }
+        else {
+            // hide the cursor when done
+            highlight_index = COLLECTION_HL_NONE
+        }
+
         draw_collection(info->player_cards, highlight_index, info->bet_sel);
         refresh();
+    }
+}
+
+void process_action(game_info *info) {
+    int sel;
+    int highlight = 0;
+    char *options[ACTION_OPTION_NUM];
+    int options_used = 0;
+    int rand_card;
+    int action_done = 0;
+
+    options[options_used] = ACTION_STAND;
+    options_used++;
+
+    // add hit option only if there are still hards to be drawn and there
+    // is room in the hand
+    if (game_info_can_hit(info)) {
+        options[options_used] = ACTION_HIT;
+        options_used++;
+    }
+
+    draw_action(options, options_used, highlight);
+    refresh();
+
+    while (action_done == 0) {
+        sel = getch();
+
+        switch (sel) {
+            case KIN_UP:
+                // decrease value since y increases downwards
+                highlight--;
+                highlight = mod(highlight, options_used);
+                break;
+            case KIN_DOWN:
+                // increase value since y increases downwards
+                highlight++;
+                highlight = mod(highlight, options_used);
+                break;
+            case KIN_SELECT:
+            case KIN_CONFIRM:
+                if (highlight == SEL_STAND) {
+                    info->last_action = SEL_STAND;
+                }
+                else if (highlight == SEL_HIT) {
+                    rand_card = game_info_random_card(info);
+                    game_info_hand_player_add(info, rand_card);
+                    info->last_action = SEL_HIT;
+                }
+                action_done = 1;
+                break;
+            case default:
+                break;
+        }
+
+        draw_action(options, options_used, highlight);
+        refresh();
+    } 
+}
+
+void process_dealer_play(game_info *info) {
+    // flip over facedown card
+    while (info->sum_dealer <= DEALER_HIT_MAX 
+            && info->dealer_hand_size < HAND_MAX_SIZE) {
+        game_info_hand_dealer_add(info, game_info_random_card(info));
+        // redraw table
+        draw_table(
+                info->hand_dealer,
+                info->hand_dealer_len,
+                info->hand_player,
+                info->hand_player_len);
     }
 }
 
@@ -158,15 +265,3 @@ void evaluate_game_status() {
     // game is over if player has no cards or the deck has less than four cards
 }
 
-void game_info_reset(game_info *info) {
-    // the deck will initially hold all the cards
-    memset(info->deck, 1, DECK_SIZE * sizeof(info->deck[0]));
-    // the player will initially own no cards
-    memset(info->player_cards, 0, DECK_SIZE * sizeof(info->player_cards[0]));
-    // no cards are selected for betting
-    memset(info->bet_sel, 0, DECK_SIZE * sizeof(info->bet_sel[0]));
-
-    info->game_is_over = 0;
-    info->round_state = 0;
-    info->bet_min = BET_MIN_INITIAL;
-}
