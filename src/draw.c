@@ -76,44 +76,32 @@ void draw_stats(int total_dealer, int total_player, int min_bet, int deck_left) 
 }
 
 void draw_collection(int *player_cards, int highlight_current, int *highlight_all) {
-    int i;
-    int card_val;
+    int i, j;
     int card_index;
     char value[BUFSIZ_VAL];
     char suit[BUFSIZ_SUIT];
 
-    int spr_h = SPR_COLLECTION_H + SPR_COLLECTION_ROWS;
-
-    char buf_sprite[SPR_COLLECTION_W];
-    // add space in each row for null terminator
-    // holds the chars for the sprite on stack
-    char sprite_arr[spr_h][SPR_COLLECTION_W + 1]; 
-    // this array holds the pointers to each string in sprite_arr
+    // temporary buf used to build the printed strings
     char buf_item[SPR_COLLECTION_W];
     char *sprite[] = SPR_COLLECTION;
-    char *txt_collection[] = SPR_COLLECTION;
     int x_items = SPR_COLLECTION_X;
     int y_items = SPR_COLLECTION_Y + SPR_COLLECTION_H;
 
-    draw_sprite(SPR_COLLECTION_X,
-            SPR_COLLECTION_Y,
+    draw_sprite(SPR_COLLECTION_Y,
+            SPR_COLLECTION_X,
             sprite,
             SPR_COLLECTION_H);
 
+    
+    refresh();
     for (i = 0; i < COLLECTION_ROWS; i++) {
         for (j = 0; j < SUIT_SIZE; j++) {
-            card_index = i * COLLECTION_ROWS + j;
-            resolve_card_val(value, BUFSIZ_VAL, j);
-            resolve_card_suit(suit, BUFSIZ_SUIT, i);
+            card_index = i * SUIT_SIZE + j;
             
-            memset(buf_item, 0, SPR_COLLECTION_W);
-            
-            strcat(buf_item, value);
-            strcat(buf_item, suit);
-
+            // print the cursor
             if (card_index == highlight_current) {
                 mvprintw(
-                        y_items, 
+                        y_items + i, 
                         x_items + COLLECTION_PAD_L + j * COLLECTION_ITEM_W,
                         COLLECTION_CURSOR);
             }
@@ -123,6 +111,26 @@ void draw_collection(int *player_cards, int highlight_current, int *highlight_al
                         x_items + COLLECTION_PAD_L + j * COLLECTION_ITEM_W,
                         COLLECTION_CURSOR_BLANK);
             }
+            
+            // print blank and continue if the player does not own the card
+            if (player_cards[card_index] == 0) {
+                mvprintw(
+                        y_items + i, 
+                        x_items + COLLECTION_PAD_L + j * COLLECTION_ITEM_W 
+                        + COLLECTION_CURSOR_LEN,
+                        COLLECTION_BLANK);
+
+                continue;
+            }
+
+            resolve_card_val(value, BUFSIZ_VAL, card_index);
+            resolve_card_suit(suit, BUFSIZ_SUIT, card_index);
+            
+            memset(buf_item, 0, SPR_COLLECTION_W);
+            
+            strcat(buf_item, value);
+            strcat(buf_item, suit);
+
             if (highlight_all[card_index] == 1) {
                 attron(A_REVERSE); 
                 mvprintw(
@@ -132,9 +140,15 @@ void draw_collection(int *player_cards, int highlight_current, int *highlight_al
                         buf_item);
                 attroff(A_REVERSE); 
             }
+            else {
+                mvprintw(
+                        y_items + i, 
+                        x_items + COLLECTION_PAD_L + j * COLLECTION_ITEM_W 
+                        + COLLECTION_CURSOR_LEN,
+                        buf_item);
+            }
         }
     }
-
 /*
     memset(sprite_arr, 0, spr_h * (SPR_COLLECTION_W + 1) * sizeof(char));
 

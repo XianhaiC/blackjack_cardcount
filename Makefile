@@ -23,3 +23,6 @@ clean:
 
 engine: $(OBJDIR)/engine.o $(OBJ)
 	$(CC) -o $(OUTDIR)/$@ $^ $(CFLAGS) $(LIBS)
+
+blackjack: $(OBJDIR)/blackjack.o $(OBJ)
+	$(CC) -o $(OUTDIR)/$@ $^ include/blackjack.h $(CFLAGS) $(LIBS)

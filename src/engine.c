@@ -6,31 +6,23 @@
 int main(int argc, char *argv[]) {
     char *options[] = {"EAT SHIT", "DIE", "FUCK OFF"};
     int player_cards[DECK_SIZE];
+    int highlight_all[DECK_SIZE];
     initscr();
     noecho();
     curs_set(FALSE);
     
-    memset(player_cards, 0, DECK_SIZE * sizeof(int));
+    memset(player_cards, 1, DECK_SIZE * sizeof(int));
+    memset(highlight_all, 0, DECK_SIZE * sizeof(int));
 
-    player_cards[0] = 1;
-    player_cards[1] = 1;
-    player_cards[2] = 1;
-    player_cards[3] = 1;
-    player_cards[4] = 1;
-    player_cards[5] = 1;
-    player_cards[6] = 1;
-    player_cards[7] = 1;
-    player_cards[8] = 1;
-    player_cards[9] = 1;
-    player_cards[10] = 1;
-    player_cards[11] = 1;
-    player_cards[12] = 1;
 
+    highlight_all[5] = 1;
+    highlight_all[6] = 1;
+    highlight_all[7] = 1;
 
     draw_skeleton();
     draw_stats(20, 69, 2, 30);
     draw_action(options, 3, 0);
-    draw_collection(player_cards);
+    draw_collection(player_cards, 26, highlight_all);
     draw_card(TABLE_DEALER_Y, TABLE_DEALER_X, 9);
     draw_card(TABLE_DEALER_Y, TABLE_DEALER_X + SPR_CARD_W, 51);
     draw_card(TABLE_DEALER_Y, TABLE_DEALER_X + 2 * SPR_CARD_W, -1);

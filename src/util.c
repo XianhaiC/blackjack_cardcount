@@ -1,5 +1,9 @@
 #include "util.h"
 
+int mod(int x, int m) {
+    return (x%m + m)%m;
+}
+
 // modifies a string since the value 10 is two chars
 void resolve_card_val(char *val, int len_val, int card) {
     int val_index = card % SUIT_SIZE;
