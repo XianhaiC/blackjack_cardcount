@@ -11,7 +11,7 @@ void resolve_card_val(char *val, int len_val, int card) {
 
 // sets the value of passed in string to be the suit
 void resolve_card_suit(char *suit, int len_suit, int card) {
-    int suit_index = card / DECK_SUITS;
+    int suit_index = card / SUIT_SIZE;
     char *suits_all[] = CARD_TO_SUIT;
 
     memset(suit, 0, len_suit);

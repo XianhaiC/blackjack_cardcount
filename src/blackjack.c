@@ -64,15 +64,15 @@ void init_game(game_info *info) {
 
     // draw the initial board
     draw_skeleton();
-
+    draw_collection(info->player_cards);
 }
 
-void process_gameplay() {
+void process_gameplay(game_info *info) {
 
     // play rounds until the player wins or loses
     while (1) {
         // play a round
-        play_round();
+        play_round(info);
         // determine if the game has ended
         evaluate_game_status();
         // break if game is over
@@ -81,10 +81,15 @@ void process_gameplay() {
 
 void play_round() {
     // betting phase
+    process_betting();
     // player actions phase
     // dealer actions phase
     // winner determination
     // bet distribution phase
+}
+
+void process_betting() {
+    while 
 }
 
 void evaluate_game_status() {

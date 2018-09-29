@@ -9,7 +9,7 @@
 void draw_sprite(int y, int x, char **sprite, int len_sprite) {
     int i;
 
-    for (i = 0; sprite[i] != NULL; i++) {
+    for (i = 0; i < len_sprite; i++) {
         mvprintw(y + i, x, sprite[i]);
     }
 }
@@ -60,7 +60,6 @@ void draw_card(int y, int x, int card) {
             mvprintw(y + 4, x, sprite[4]);
             mvprintw(y + 5, x, sprite[5], value);
         }
-
     }
 }
 
@@ -76,7 +75,7 @@ void draw_stats(int total_dealer, int total_player, int min_bet, int deck_left) 
     mvprintw(y + 4, x, sprite[4], deck_left);
 }
 
-void draw_collection(int *player_cards) {
+void draw_collection(int *player_cards, int highlight_current, int *highlight_all) {
     int i;
     int card_val;
     int card_index;
@@ -90,11 +89,53 @@ void draw_collection(int *player_cards) {
     // holds the chars for the sprite on stack
     char sprite_arr[spr_h][SPR_COLLECTION_W + 1]; 
     // this array holds the pointers to each string in sprite_arr
-    char *sprite[spr_h];
+    char buf_item[SPR_COLLECTION_W];
+    char *sprite[] = SPR_COLLECTION;
     char *txt_collection[] = SPR_COLLECTION;
-    int x = SPR_COLLECTION_X;
-    int y = SPR_COLLECTION_Y;
+    int x_items = SPR_COLLECTION_X;
+    int y_items = SPR_COLLECTION_Y + SPR_COLLECTION_H;
 
+    draw_sprite(SPR_COLLECTION_X,
+            SPR_COLLECTION_Y,
+            sprite,
+            SPR_COLLECTION_H);
+
+    for (i = 0; i < COLLECTION_ROWS; i++) {
+        for (j = 0; j < SUIT_SIZE; j++) {
+            card_index = i * COLLECTION_ROWS + j;
+            resolve_card_val(value, BUFSIZ_VAL, j);
+            resolve_card_suit(suit, BUFSIZ_SUIT, i);
+            
+            memset(buf_item, 0, SPR_COLLECTION_W);
+            
+            strcat(buf_item, value);
+            strcat(buf_item, suit);
+
+            if (card_index == highlight_current) {
+                mvprintw(
+                        y_items, 
+                        x_items + COLLECTION_PAD_L + j * COLLECTION_ITEM_W,
+                        COLLECTION_CURSOR);
+            }
+            else {
+                mvprintw(
+                        y_items + i, 
+                        x_items + COLLECTION_PAD_L + j * COLLECTION_ITEM_W,
+                        COLLECTION_CURSOR_BLANK);
+            }
+            if (highlight_all[card_index] == 1) {
+                attron(A_REVERSE); 
+                mvprintw(
+                        y_items + i, 
+                        x_items + COLLECTION_PAD_L + j * COLLECTION_ITEM_W 
+                        + COLLECTION_CURSOR_LEN,
+                        buf_item);
+                attroff(A_REVERSE); 
+            }
+        }
+    }
+
+/*
     memset(sprite_arr, 0, spr_h * (SPR_COLLECTION_W + 1) * sizeof(char));
 
     for (i = 0; i < spr_h; i++) {
@@ -143,30 +184,39 @@ void draw_collection(int *player_cards) {
         sprite[i] = sprite_arr[i];
     }
 
-
     draw_sprite(
             SPR_COLLECTION_Y,
             SPR_COLLECTION_X,
             sprite,
-            SPR_COLLECTION_H);
+            spr_h);
+            */
 }
 
-void draw_action(char *options[], int len_options) {
+void draw_action(char *options[], int len_options, int highlight) {
     int i;
+    int x = SPR_ACTION_X;
+    int y = SPR_ACTION_Y;
     int len_sprite = SPR_ACTION_H + len_options;
-    char *txt_action[] = SPR_ACTION;
-    char *sprite[len_sprite];
+    char *sprite[] = SPR_ACTION;
 
-    for (i = 0; i < len_sprite; i++) {
-        if (i < SPR_ACTION_H) {
-            sprite[i] = txt_action[i];
+    draw_sprite(SPR_ACTION_Y, SPR_ACTION_X, sprite, SPR_ACTION_H);
+
+    for (i = 0; i < len_options; i++) {
+        if (i == highlight) {
+            attron(A_REVERSE);
+            mvprintw(
+                    SPR_ACTION_Y + SPR_ACTION_H + i,
+                    SPR_ACTION_X + ACTION_OPTION_PAD_L,
+                    options[i]);
+            attroff(A_REVERSE);
         }
         else {
-            sprite[i] = options[i - SPR_ACTION_H];
+            mvprintw(
+                    SPR_ACTION_Y + SPR_ACTION_H + i,
+                    SPR_ACTION_X + ACTION_OPTION_PAD_L,
+                    options[i]);
         }
     }
-
-    draw_sprite(SPR_ACTION_Y, SPR_ACTION_X, sprite, len_sprite);
 }
 
 void draw_table(int *dealer_hand, int len_dealer, int *player_hand, int len_player) {

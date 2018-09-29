@@ -21,6 +21,15 @@
 #define TABLE_PLAYER_X 12
 #define TABLE_PLAYER_Y 8
 
+#define ACTION_OPTION_PAD_L 3
+
+#define COLLECTION_ROWS 4
+#define COLLECTION_PAD_L 1
+#define COLLECTION_ITEM_W 6
+#define COLLECTION_CURSOR "> "
+#define COLLECTION_CURSOR_BLANK "  "
+#define COLLECTION_CURSOR_LEN 2
+
 // util macros
 #define CARD_TO_VAL {\
     "A", "2", "3", "4", "5",\
