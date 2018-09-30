@@ -84,19 +84,13 @@ void play_round(game_info *info) {
     info->sum_dealer = 0;
     info->sum_player = 0;
     info->last_action = -1;
-
-    // clear the board
-    draw_table(
-            info->hand_dealer,
-            info->hand_dealer_size,
-            info->hand_player,
-            info->hand_player_size);
-    refresh();
     
     // betting phase
     process_betting(info);
 
-    usleep(DELAY_CARD_REVEAL);
+    draw_table_clear();
+    draw_notice_turn_player();
+    usleep(DELAY_TURN_PLAYER);
     
     for (i = 0; i < ROUND_START_CARD_AMT; i++) {
         rand_card = game_info_random_card(info);
@@ -128,7 +122,6 @@ void play_round(game_info *info) {
             hand_dealer_facedown_val, 
             info->sum_player,
             info->bet_min, info->deck_remaining);
-    refresh();
 
     if (!game_info_hand_bj(info->hand_player, info->hand_player_size)) {
         // give players initial cards
@@ -137,10 +130,7 @@ void play_round(game_info *info) {
             // process a player action
             process_action(info);
 
-            if (info->last_action == SEL_STAND) {
-                break;
-            }
-            else if (info->last_action == SEL_HIT) {
+            if (info->last_action == SEL_HIT) {
                 rand_card = game_info_random_card(info);
                 game_info_hand_player_add(info, rand_card);
 
@@ -157,20 +147,27 @@ void play_round(game_info *info) {
                     info->sum_player,
                     info->bet_min, info->deck_remaining);
 
-            if (info->sum_player > POINTS_MAX) {
-                // player loses round
+            usleep(DELAY_ACTION);
+
+            // stop taking actions if the sum has gone over or stand is chosen
+            if (info->last_action == SEL_STAND
+                    || info->sum_player > POINTS_MAX) {
                 break;
             }
         }
 
         // dealer plays if the player has not busted
         if (info->sum_player <= POINTS_MAX) {
-            process_dealer_play(info);    
+            draw_notice_turn_dealer();
+            usleep(DELAY_DEALER_PLAY);
             draw_table(
-                    info->hand_dealer,
-                    info->hand_dealer_size,
+                    hand_dealer_facedown,
+                    hand_dealer_facedown_size,
                     info->hand_player,
                     info->hand_player_size);
+            usleep(DELAY_DEALER_PLAY);
+
+            process_dealer_play(info);    
         }
 
         // winner determination
@@ -186,7 +183,8 @@ void play_round(game_info *info) {
                 }
                 // push
                 else {
-                    //notice_tie();
+                    draw_action_clear();
+                    draw_notice_round_tie();
                 }
             }
             else {
@@ -198,25 +196,25 @@ void play_round(game_info *info) {
         }
     }
     else {
+        usleep(DELAY_BJ);
+        draw_notice_bj();
+        usleep(DELAY_BJ);
         process_bet_winnings(info, 1);
     }
-
-    draw_collection(info->player_cards, COLLECTION_HL_NONE, info->bet_sel);
-    draw_stats(
-            info->sum_dealer, 
-            info->sum_player,
-            info->bet_min, info->deck_remaining);
-    refresh();
-
+    
+    usleep(DELAY_ROUND_END);
     getch();
 }
 
 void process_bet_loss(game_info *info) {
     int i;
     
+    draw_action_clear();
+
     // if the player loses all his betting cards then end the game
     if (info->player_cards_remaining - info->bet_amt <= 0) {
         info->game_is_over = 1;
+        draw_notice_game_lost();
         return;
     }
 
@@ -225,12 +223,16 @@ void process_bet_loss(game_info *info) {
             game_info_give_deck_card(info, i);
         }
     }
+
+    draw_notice_round_lost();
 }
 
 void process_bet_winnings(game_info *info, int bj) {
     int i;
     int rand_card;
     int bet_amt;
+
+    draw_action_clear();
 
     // multiply winnings by blackjack payout if bj set
     if (bj) {
@@ -243,6 +245,7 @@ void process_bet_winnings(game_info *info, int bj) {
     // the game is won
     if (info->deck_remaining - bet_amt < DECK_REMAINING_MIN) {
         info->game_is_over = 1;
+        draw_notice_game_won();
         return;
     }
 
@@ -251,6 +254,8 @@ void process_bet_winnings(game_info *info, int bj) {
         rand_card = game_info_random_card(info);
         game_info_give_player_card(info, rand_card);        
     }
+
+    draw_notice_round_won();
 }
 
 void process_betting(game_info *info) {
@@ -274,8 +279,12 @@ void process_betting(game_info *info) {
     highlight_x = i % SUIT_SIZE;
     highlight_y = i / SUIT_SIZE;
 
+    // draw sprites
+    draw_table_clear();
+    draw_stats_clear();
+    draw_action_clear();
     draw_collection(info->player_cards, highlight_index, info->bet_sel);
-    refresh();
+    draw_notice_bet(info->bet_min);
 
     while (betting_done == 0) {
         sel = getch();
@@ -331,13 +340,12 @@ void process_betting(game_info *info) {
         }
 
         draw_collection(info->player_cards, highlight_index, info->bet_sel);
-        refresh();
     }
 }
 
 void process_action(game_info *info) {
     int sel;
-    int highlight = 0;
+    int highlight = info->last_action;
     char *options[ACTION_OPTION_NUM];
     int options_used = 0;
     int rand_card;
@@ -354,7 +362,6 @@ void process_action(game_info *info) {
     }
 
     draw_action(options, options_used, highlight);
-    refresh();
 
     while (action_done == 0) {
         sel = getch();
@@ -385,12 +392,10 @@ void process_action(game_info *info) {
         }
 
         draw_action(options, options_used, highlight);
-        refresh();
     } 
 }
 
 void process_dealer_play(game_info *info) {
-    usleep(DELAY_DEALER_PLAY);
     // flip over facedown card
     draw_table(
             info->hand_dealer,
@@ -403,11 +408,11 @@ void process_dealer_play(game_info *info) {
             info->sum_player,
             info->bet_min, info->deck_remaining);
 
-    refresh();
     usleep(DELAY_DEALER_PLAY);
 
     while (info->sum_dealer <= DEALER_HIT_MAX 
-            && info->hand_dealer_size < HAND_MAX_SIZE) {
+            && info->hand_dealer_size < HAND_MAX_SIZE
+            && info->deck_remaining > 0) {
         game_info_hand_dealer_add(info, game_info_random_card(info));
 
         // redraw table
@@ -422,7 +427,6 @@ void process_dealer_play(game_info *info) {
                 info->sum_player,
                 info->bet_min, info->deck_remaining);
 
-        refresh();
         usleep(DELAY_DEALER_PLAY);
     }
 }
