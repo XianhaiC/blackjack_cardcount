@@ -8,18 +8,20 @@
 #define DECK_SUITS 4
 #define SUIT_SIZE 13
 #define POINTS_FACE 10
-#define POINTS_FACE_INDEX 9
 #define POINTS_ACE_HARD 11
 #define POINTS_ACE_SOFT 1
 #define POINTS_MAX 21
 #define DEALER_HIT_MAX 16
 #define PLAYER_START_CARDS 10
 #define BET_MIN_INITIAL 1
-#define DECK_LEFTOVER_WIN 3
+#define DECK_REMAINING_MIN 4
 #define HAND_MAX_SIZE 6
+#define HAND_BJ_SIZE 2
+#define BJ_PAYOUT 1.5f
 #define SEL_NONE -1
 #define SEL_STAND 0
 #define SEL_HIT 1
+#define ROUND_START_CARD_AMT 2
 
 // drawing macros
 #define COLLECTION_PAD "    "
@@ -65,5 +67,9 @@
 #define KIN_RIGHT 'd'
 #define KIN_SELECT 'h'
 #define KIN_CONFIRM 'j'
+
+// delay macros
+#define DELAY_DEALER_PLAY 3000000
+#define DELAY_CARD_REVEAL 500000
 
 #endif

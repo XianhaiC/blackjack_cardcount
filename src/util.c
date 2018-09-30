@@ -50,39 +50,75 @@ void game_info_bet_sel_toggle(game_info *info, int card) {
 }
 
 void game_info_hand_player_add(game_info *info, int card) {
-    int points;
-    if (card % SUIT_SIZE == CARD_ACE) {
-        points = info->sum_player + POINTS_ACE_HARD > POINTS_MAX ? 
-            POINTS_ACE_SOFT : POINTS_ACE_HARD;
-    }
-    else {
-        points = resolve_points(card);
-    }
-    
     // update player info
-    info->sum_player += points;
     info->hand_player[info->hand_player_size] = card;
     (info->hand_player_size)++;
+    info->sum_player = game_info_hand_sum(
+            info->hand_player, 
+            info->hand_player_size);
 }
 
 void game_info_hand_dealer_add(game_info *info, int card) {
-    int points;
-    if (card % SUIT_SIZE == CARD_ACE) {
-        points = info->sum_dealer + POINTS_ACE_HARD > POINTS_MAX ? 
-            POINTS_ACE_SOFT : POINTS_ACE_HARD;
-    }
-    else {
-        points = resolve_points(card);
-    }
-    
     // update player info
-    info->sum_dealer += points;
     info->hand_dealer[info->hand_dealer_size] = card;
     (info->hand_dealer_size)++;
+    info->sum_dealer = game_info_hand_sum(
+            info->hand_dealer, 
+            info->hand_dealer_size);
+}
+
+int game_info_hand_sum(int *hand, int len_hand) {
+    int i;
+    int sum = 0;
+    int points;
+    
+    for (i = 0; i < len_hand; i++) {
+        // skip summing aces first
+        if (hand[i] % SUIT_SIZE == CARD_ACE) {
+            continue;
+        }
+
+        points = resolve_card_points(hand[i]);
+        sum += points;
+    }
+
+    for (i = 0; i < len_hand; i++) {
+        // now sum the aces
+        if (hand[i] % SUIT_SIZE != CARD_ACE) {
+            continue;
+        }
+
+        points = sum + POINTS_ACE_HARD > POINTS_MAX ? 
+            POINTS_ACE_SOFT : POINTS_ACE_HARD;
+        sum += points;
+    }
+
+    return sum;
+}
+
+int game_info_hand_bj(int *hand, int len_hand) {
+    int i;
+    int contains_ace = 0;
+    int contains_face = 0;
+
+    if (len_hand != HAND_BJ_SIZE) {
+        return 0;
+    }
+
+    for (i = 0; i < len_hand; i++) {
+        if (hand[i] % SUIT_SIZE == 0) {
+            contains_ace = 1;
+        }
+        else if (resolve_card_points(hand[i]) == POINTS_FACE) {
+            contains_face = 1;
+        }
+    }
+
+    return contains_ace && contains_face;
 }
 
 // checks if the player can still hit a card
-void game_info_can_hit(game_info *info) {
+int game_info_can_hit(game_info *info) {
     int cards_to_draw = 
         info->deck_remaining 
         - info->hand_player_size
@@ -154,5 +190,10 @@ void resolve_card_suit(char *suit, int len_suit, int card) {
 
 // the ace returns a value of 1, handle that seperately
 int resolve_card_points(int card) {
-    return (card % SUIT_SIZE / POINTS_TEN_INDEX) * POINTS_TEN;
+    // reduces to int between 1-13 inclusive
+    int card_val = card % SUIT_SIZE + 1;
+    if (card_val >= POINTS_FACE) {
+        card_val = POINTS_FACE;
+    }
+    return card_val;
 }

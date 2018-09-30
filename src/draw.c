@@ -28,7 +28,7 @@ void draw_card(int y, int x, int card) {
     char value[BUFSIZ_VAL];
     char suit[BUFSIZ_SUIT];
 
-    if (card == NULL_CARD) {
+    if (card == CARD_NULL) {
         char *sprite[] = SPR_CARD_NULL;
         draw_sprite(y, x, sprite, SPR_CARD_H);
     }
